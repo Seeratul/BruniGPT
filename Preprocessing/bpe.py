@@ -1,4 +1,7 @@
-def tokenization(text):
+import pickle
+from collections import defaultdict
+
+def tokenization_dict(text):
     """
     Tokenizes a raw text string into a dictionary of word counts.
     Args:
@@ -21,6 +24,33 @@ def tokenization(text):
 
     return word_counts
 
+def tokenization_list(text,merge_rules):
+    change = True
+    merge_dict = defaultdict(list)
+    #split and set lower case
+    words = text.lower().split()
+    #tokenize leaving an artifact list
+    textlist = [list(word+" ") for word in words]
+    #removing artifact list
+    textlist = [x for xs in textlist for x in xs]
+    textlist = [w.replace(' ', '</w>') for w in textlist]
+
+    for i in range(len(merge_rules)):
+        merge_dict[merge_rules[i][0]].append(merge_rules[i][1])
+    
+    while change :
+        f = 0
+        change = False
+        for i in range(len(textlist)):
+            for j in range(len(merge_dict[textlist[i-f]])):
+                if textlist[i+1-f]==merge_dict[textlist[i-f]][j]:
+                    change = True
+                    textlist[i-f] = textlist[i-f]+textlist[i+1-f]
+                    textlist.pop(i+1-f)
+                    f+= 1
+                    break
+                    
+    return textlist
 
 def get_stats(vocab):
     """Count frequencies of adjacent pairs in the vocabulary."""
@@ -38,7 +68,6 @@ def get_stats(vocab):
        
     return pairs, symboln
 
-
 def merge_vocab(pair, v_in):
     """Merge the most frequent pair in the vocabulary keys."""
     v_out = {}
@@ -49,7 +78,6 @@ def merge_vocab(pair, v_in):
         new_word = word.replace(bigram, replacement)
         v_out[new_word] = freq
     return v_out
-
 
 def bpe(word_counts, num_merges,frac = 0):
     """
@@ -75,7 +103,7 @@ def bpe(word_counts, num_merges,frac = 0):
         # 2. Get statistics of adjacent pairs
         stats, symboln = get_stats(vocab)
         if not stats:
-            raise ValueError('Your merge number leads back to theinital dataset.')
+            raise ValueError('Your merge number leads back to the inital dataset.')
     
 
         # 3. Find the most frequent pair
@@ -87,6 +115,7 @@ def bpe(word_counts, num_merges,frac = 0):
         elif(stats[best_pair]>= symboln[best_pair[1]]*frac):
             merges.append(best_pair)
             # 4. Merge the pair in the vocabulary
+            vocab = merge_vocab(best_pair, vocab)
         else:
             print("A tototal of "+ str(i-1) +" merges were performed before the frac threshold was reached")
             break
@@ -103,8 +132,6 @@ def bpe(word_counts, num_merges,frac = 0):
 
     return final_tokens, merges,startingvocab
 
-
-
 def preprocessing(string,num_merges,frac=0):
     """
     Performs Byte-Pair Encoding to learn merge rules and create a vocabulary, includes text preprocessing.
@@ -120,17 +147,40 @@ def preprocessing(string,num_merges,frac=0):
             - list: The learned merge rules in order.
             - set: The starting vocab.
     """
-    word_counts = tokenization(string)
+    word_counts = tokenization_dict(string)
     final_vocab, merge_rules,vocabold = bpe(word_counts, num_merges, frac)
     return final_vocab, merge_rules,vocabold
 
 
 if __name__ == "__main__":
-    # Example usage of the full tokenization and BPE pipeline
-    #sample_text = "house house house cat sat rat"
+    # Example usage of the full tokenization_dict and BPE pipeline
+    newtext = False
+    tl= False
+    #sample_text = "House house house cat sat rat hand harry handicap andasda"
     f = open("shakes.txt")
     sample_text = f.read()
     f.close()
-    final_vocab, merge_rules,vocabold = preprocessing(sample_text,10)
-    print("--- Final Vocabulary ---")
-    print(sorted(list(final_vocab)))
+    if(newtext):
+        final_vocab, merge_rules,vocabold = preprocessing(sample_text,200)
+        with open("vocab.pkl", "wb") as fp:
+            pickle.dump([final_vocab,merge_rules],fp)
+        fp.close()
+        merge_rules = []
+
+    if tl:
+        with open("vocab.pkl", "rb") as fp:
+            [final_vocab,merge_rules]=pickle.load(fp)
+            fp.close()
+    
+        tl = tokenization_list(sample_text,merge_rules)
+
+        with open("tl.pkl", "wb") as fp:
+            pickle.dump(tl,fp)
+        fp.close()
+    else:
+        with open("tl.pkl", "rb") as fp:
+            tl=pickle.load(fp)
+    print(tl[0:100])
+   
+    #print("--- Final Vocabulary ---")
+    #print(sorted(list(final_vocab)))
