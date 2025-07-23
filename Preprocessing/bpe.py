@@ -164,7 +164,7 @@ def tokencounter(text):
 if __name__ == "__main__":
     # Example usage of the full tokenization_dict and BPE pipeline
     newtext = False
-    tl= True
+    tl= False
     #sample_text = "House house house cat sat rat hand harry handicap andasda"
     f = open("shakes.txt")
     sample_text = f.read()
@@ -178,7 +178,7 @@ if __name__ == "__main__":
 
     if tl:
         with open("vocab.pkl", "rb") as fp:
-            [final_vocab,merge_rules]=pickle.load(fp)
+            [final_vocab,merge_rules,vocabold]=pickle.load(fp)
             fp.close()
     
         tl = tokenization_list(sample_text,merge_rules)
@@ -189,5 +189,5 @@ if __name__ == "__main__":
     else:
         with open("tl.pkl", "rb") as fp:
             tl=pickle.load(fp)
-    
-    print("compression rate "+ str(tokencounter(sample_text)/len(tl)))
+    print(tl[0:100])
+    #print("compression rate "+ str(tokencounter(sample_text)/len(tl)))
