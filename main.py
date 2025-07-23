@@ -38,7 +38,8 @@ def evaluator(text,ngram_model,n):
 
     test = True
     for i in range(len(text)-n):
-        perplexity += np.log2(max(ngram_model[tuple(text[i-n:i])][text[i]],0.00001))
+        print(tuple(text[i-n:i]))
+        perplexity += np.log2(max(ngram_model.evaluate(tuple(text[i-n:i]),text[i]),0.00001))
         probs.extend([ngram_model[tuple(text[i-n:i])][text[i]]])
     mean_prob = np.mean(probs)
     perplexity = perplexity/i
@@ -46,9 +47,7 @@ def evaluator(text,ngram_model,n):
     return perplexity, mean_prob
 
 if __name__ == "__main__":
-    # Example usage of the full tokenization_dict and BPE pipeline
-
-    #sample_text = "House house house cat sat rat hand harry handicap andasda"
+    n = 1
     f = open("shakes.txt")
     text = f.read()
     f.close()
@@ -56,13 +55,13 @@ if __name__ == "__main__":
     print("Vocab Setup Done")
     tl = tokenizetext(text,merge_rules,use_old=True)
     print("Tokenization Done")
-    ngram_model = ngram.generate_ngram_model(n=4, samplett=tl)
-    print("Ngram Model Generated")
-    perplexity = evaluator(tl,ngram_model,4)
-    print("Evaluated!!:) Perplexity: "+ str(perplexity[0])+" Mean Prob:"+str(perplexity[1]))
-    model1 = ngram.y_grammodel(4,tl)
-    a = model1.train()
-    print(a)
+    modeln = ngram.y_grammodel(n,tl)
+    modeln.train()
+    print("Modelensemble Generated")
+    #perplexity = evaluator(tl,modeln,n)
+    #print("Evaluated!!:) Perplexity: "+ str(perplexity[0])+" Mean Prob:"+str(perplexity[1]))
+    print(modeln.evaluate(('th', 'is</w>', 'is</w>'),"a"))
+    print(modeln.generate(('th', 'is</w>', 'is</w>')))
     
     #print(ngram_model[('th', 'is</w>', 'is</w>')]["the"])
     #print(tl[0:3])
