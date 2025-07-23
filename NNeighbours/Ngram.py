@@ -52,6 +52,27 @@ def generate_ngram_model(n: int, samplett: List[str]) -> Dict[Tuple[str, ...], L
 
     return ngram_counts
 
+class y_grammodel:
+    def __init__(self,n: int, samplett):
+        self.n = n
+        self.samplett = samplett
+        self.ngram_dict = [None]*n
+        if n<2:
+            raise ValueError("n must be at least 2 to have a preceding word context.")
+
+    def train(self):
+        for i in range(self.n-1):
+            self.ngram_dict[i] = generate_ngram_model(i+2,self.samplett)
+        return True
+    
+    def evaluate(self,text):
+        return 0
+    
+    def generate(self,text):
+        return 0
+
+
+
 # Example Usage
 if __name__ == "__main__":
     # Sample text from "A Tale of Two Cities"

@@ -37,7 +37,8 @@ def tokenization_list(text,merge_rules):
 
     for i in range(len(merge_rules)):
         merge_dict[merge_rules[i][0]].append(merge_rules[i][1])
-    
+
+
     while change :
         f = 0
         change = False

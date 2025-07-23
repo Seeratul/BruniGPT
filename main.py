@@ -60,6 +60,10 @@ if __name__ == "__main__":
     print("Ngram Model Generated")
     perplexity = evaluator(tl,ngram_model,4)
     print("Evaluated!!:) Perplexity: "+ str(perplexity[0])+" Mean Prob:"+str(perplexity[1]))
+    model1 = ngram.y_grammodel(4,tl)
+    a = model1.train()
+    print(a)
+    
     #print(ngram_model[('th', 'is</w>', 'is</w>')]["the"])
     #print(tl[0:3])
     #print(tuple(tl[0:3]))
