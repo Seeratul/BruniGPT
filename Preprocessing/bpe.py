@@ -151,11 +151,20 @@ def preprocessing(string,num_merges,frac=0):
     final_vocab, merge_rules,vocabold = bpe(word_counts, num_merges, frac)
     return final_vocab, merge_rules,vocabold
 
+def tokencounter(text):
+    words = text.lower().split()
+    #tokenize leaving an artifact list
+    textlist = [list(word+" ") for word in words]
+    #removing artifact list
+    textlist = [x for xs in textlist for x in xs]
+    textlist = [w.replace(' ', '</w>') for w in textlist]
+    
+    return len(textlist)
 
 if __name__ == "__main__":
     # Example usage of the full tokenization_dict and BPE pipeline
     newtext = False
-    tl= False
+    tl= True
     #sample_text = "House house house cat sat rat hand harry handicap andasda"
     f = open("shakes.txt")
     sample_text = f.read()
@@ -180,7 +189,5 @@ if __name__ == "__main__":
     else:
         with open("tl.pkl", "rb") as fp:
             tl=pickle.load(fp)
-    print(tl[0:100])
-   
-    #print("--- Final Vocabulary ---")
-    #print(sorted(list(final_vocab)))
+    
+    print("compression rate "+ str(tokencounter(sample_text)/len(tl)))
