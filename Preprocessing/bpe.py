@@ -25,6 +25,7 @@ def tokenization_dict(text):
     return word_counts
 
 def tokenization_list(text,merge_rules):
+    #There is a workaround in here i really dont like but well
     change = True
     merge_dict = {}
     #split and set lower case
@@ -33,39 +34,54 @@ def tokenization_list(text,merge_rules):
     textlist = [list(word+" ") for word in words]
     #removing artifact list
     textlist = [x for xs in textlist for x in xs]
-    textlist = [w.replace(' ', '</w>') for w in textlist]
     for i in range(len(merge_rules)):
+        merge_rules[i] = (merge_rules[i][0][0],merge_rules[i][0][1:]+merge_rules[i][1].replace('</w>'," "))
         if  merge_rules[i][0] in merge_dict:
             merge_dict[merge_rules[i][0]].append(merge_rules[i][1])
         else:
             merge_dict[merge_rules[i][0]] = [merge_rules[i][1]]
-        print(merge_dict[merge_rules[i][0]][0])
-        print(len(merge_dict[merge_rules[i][0]][0]))
 
-
-    while change :
-        f = 0
-        change = False
-        for i in range(len(textlist)):
-            for j in range(len(merge_dict[textlist[i-f]])):
-                if textlist[i+1-f]==merge_dict[textlist[i-f]][j]:
-                    change = True
-                    textlist[i-f] = textlist[i-f]+textlist[i+1-f]
-                    textlist.pop(i+1-f)
-                    f+= 1
-                    break
-                    
+    i = 0
+    while (i <len(textlist)):
+        if (i%10000==0):
+            print(len(textlist))
+            print(i)
+        if textlist[i] not in merge_dict:
+            i+=1
+            continue
+        a="".join(textlist[i+1:min(i+30,len(textlist))])
+        for j in range(len(merge_dict[textlist[i]])):
+            #This used to be a one liner
+            b = merge_dict[textlist[i]][j]
+            aj =a[:len(b)]
+            if (aj==b):
+                for k in range(len(b)):
+                    textlist[i] = textlist[i]+textlist[i+1]
+                    textlist.pop(i+1)
+                break
+        i+=1
+    #This break symbol will continue to be a problem
+    textlist = [w.replace(' ', '</w>') for w in textlist]              
     return textlist
 
-def get_stats(vocab):
+def get_stats(vocab,speedbump=5):
     """Count frequencies of adjacent pairs in the vocabulary."""
     symboln = {}
     pairs = {}
     for word, freq in vocab.items():
         symbols = word.split()
-        for i in range(len(symbols) -1):
+        pain = 0
+        if(('</w>') in symbols[len(symbols)-1]):
+            pain = 3
+        for i in range(len(symbols) -2):
             symboln[symbols[i]] = symboln.get(symbols[i], 0) + freq 
             pair = (symbols[i], symbols[i+1])
+            if(speedbump > len(pair[0])+len(pair[1])):
+                pairs[pair] = pairs.get(pair, 0) + freq
+        i = len(symbols)-2
+        symboln[symbols[i]] = symboln.get(symbols[i], 0) + freq 
+        pair = (symbols[i], symbols[i+1])
+        if(speedbump+pain > len(pair[0])+len(pair[1])):
             pairs[pair] = pairs.get(pair, 0) + freq
         symboln[symbols[len(symbols)-1]] = symboln.get(symbols[len(symbols)-1], 0) + freq
        
@@ -74,8 +90,8 @@ def get_stats(vocab):
 def merge_vocab(pair, v_in):
     """Merge the most frequent pair in the vocabulary keys."""
     v_out = {}
-    bigram = ' '.join(pair)
-    replacement = ''.join(pair)
+    bigram = (" ")+' '.join(pair)+(" ")
+    replacement = (" ")+''.join(pair)+(" ")
     for word, freq in v_in.items():
         # Replace the pair in the word string
         new_word = word.replace(bigram, replacement)
@@ -113,13 +129,12 @@ def bpe(word_counts, num_merges,extra_runtime=0,frac = 0):
 
     # 1. Prepare initial vocabulary from word counts
     #    - Split words into characters and add a special end-of-word token '</w>'
-    vocab = {' '.join(list(word) + ['</w>']): count for word, count in word_counts.items()}
+    vocab = {(' ') +' '.join(list(word) + ['</w>'])+(' '): count for word, count in word_counts.items()}
     startingvocab = set()
     vocabold = vocab
     for word in vocabold.keys():
         startingvocab.update(word.split(' '))
     merges = []
-
     for i in range(num_merges):
         # 2. Get statistics of adjacent pairs
         stats, symboln = get_stats(vocab)
@@ -132,7 +147,11 @@ def bpe(word_counts, num_merges,extra_runtime=0,frac = 0):
         vocab = merge_vocab(best_pair, vocab)
 
     for i in range(extra_runtime):
+        raise ValueError('You shouldnt be here')
         stats, symboln = get_stats(vocab)
+        if (stats == {}):
+            raise ValueError('Your merge number leads back to all full words.')
+        # 2. Get statistics of adjacent pairs
         best_pair = max(stats, key=stats.get)
         mv = stats[best_pair]
         mini = 0
@@ -168,19 +187,16 @@ def bpe(word_counts, num_merges,extra_runtime=0,frac = 0):
            
         #if stats[max(stats, key=stats.get)]:
             #return 0
-    
-     
     print("All merges performed")
 
     # 5. Create the final token vocabulary from the keys of the learned vocab
     final_tokens = set()
+
     for word in vocab.keys():
         final_tokens.update(word.split(' '))
-
-
     return final_tokens, merges,startingvocab
 
-def preprocessing(string,num_merges,frac=0):
+def preprocessing(string,num_merges,extraruntime=0,frac=0):
     """
     Performs Byte-Pair Encoding to learn merge rules and create a vocabulary, includes text preprocessing.
 
@@ -196,7 +212,7 @@ def preprocessing(string,num_merges,frac=0):
             - set: The starting vocab.
     """
     word_counts = tokenization_dict(string)
-    final_vocab, merge_rules,vocabold = bpe(word_counts, num_merges, frac)
+    final_vocab, merge_rules,vocabold = bpe(word_counts, num_merges,extraruntime)
     return final_vocab, merge_rules,vocabold
 
 def tokencounter(text):
@@ -213,14 +229,15 @@ if __name__ == "__main__":
     # Example usage of the full tokenization_dict and BPE pipeline
     newtext = False
     tl= False
-    sample_text = "House house house cat sat rat hand harry handicap andasda"
+    sample_text = "houe houe houing sewing sewing"
     #f = open("shakes.txt")
     #sample_text = f.read()
     #f.close()
-    runtime = 10
-   
-    final_vocab, merge_rules,vocabold = preprocessing(sample_text,5,runtime)
+    final_vocab, merge_rules,vocabold = preprocessing(sample_text,6,0)
     tl = tokenization_list(sample_text,merge_rules)
-    print("compression rate "+ str(tokencounter(sample_text)/len(tl)))
+    print(merge_rules)
+    print(final_vocab)
+    #print(tl)
+    #print("compression rate "+ str(tokencounter(sample_text)/len(tl)))
 
  
