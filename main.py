@@ -5,7 +5,6 @@ import NNeighbours.Ngram as ngram
 import numpy as np
 
 
-def vocab_setup(text="",use_old=False):
     sample_text = text
     if(use_old):
         with open("vocab.pkl", "rb") as fp:
@@ -46,25 +45,30 @@ def evaluator(text,ngram_model,n):
     perplexity = np.power(2, -perplexity)
     return perplexity, mean_prob
 
+def sentencegen(text,ngram_model,n):
+    while len(text)<n:
+        new = (modeln.generate(text),)
+        text = text+new
+    return text
+
 if __name__ == "__main__":
-    n = 1
+    n = 7
     f = open("shakes.txt")
     text = f.read()
     f.close()
-    final_vocab, merge_rules,vocabold = vocab_setup(text,use_old=True)
+    final_vocab, merge_rules,vocabold = vocab_setup(text,use_old=False)
     print("Vocab Setup Done")
-    tl = tokenizetext(text,merge_rules,use_old=True)
+    tl = tokenizetext(text,merge_rules,use_old=False)
     print("Tokenization Done")
+    print("compression rate "+ str(bpe.tokencounter(text)/len(tl)))
     modeln = ngram.y_grammodel(n,tl)
     modeln.train()
     print("Modelensemble Generated")
     #perplexity = evaluator(tl,modeln,n)
     #print("Evaluated!!:) Perplexity: "+ str(perplexity[0])+" Mean Prob:"+str(perplexity[1]))
-    print(modeln.evaluate(('th', 'is</w>', 'is</w>'),"a"))
-    print(modeln.generate(('th', 'is</w>', 'is</w>')))
+    print(sentencegen(("never",),modeln,100))
     
     #print(ngram_model[('th', 'is</w>', 'is</w>')]["the"])
     #print(tl[0:3])
     #print(tuple(tl[0:3]))
    
-    #print("compression rate "+ str(bpe.tokencounter(text)/len(tl)))
