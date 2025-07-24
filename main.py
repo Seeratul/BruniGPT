@@ -5,6 +5,7 @@ import NNeighbours.Ngram as ngram
 import numpy as np
 
 
+def vocab_setup(text="",use_old=False):
     sample_text = text
     if(use_old):
         with open("vocab.pkl", "rb") as fp:
@@ -37,7 +38,6 @@ def evaluator(text,ngram_model,n):
 
     test = True
     for i in range(len(text)-n):
-        print(tuple(text[i-n:i]))
         perplexity += np.log2(max(ngram_model.evaluate(tuple(text[i-n:i]),text[i]),0.00001))
         probs.extend([ngram_model[tuple(text[i-n:i])][text[i]]])
     mean_prob = np.mean(probs)
