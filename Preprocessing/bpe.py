@@ -30,6 +30,7 @@ def tokenization_dict(text):
 def tokenization_list(text,merge_rules):
     #There is a workaround in here i really dont like but well
     change = True
+    merge_rules = merge_rules.copy()
     merge_dict = {}
     #split and set lower case
     words = text.lower().split()
