@@ -52,19 +52,19 @@ def evaluator(text,ngram_model,n):
     perplexity = np.power(2, -perplexity)
     return perplexity, mean_prob
 
-def sentencegen(text,modeln,n):
+def sentencegen(text,modeln,n,top = 1):
     while len(text)<n:
-        new = (modeln.generate(text),)
-        text = text+new
+        new = (modeln.generate_rand(text,top),)
+        text = text+(new[0],)
     return text
 
 if __name__ == "__main__":
-    n = 3
-    use_old = False
-    f = open("sd_train.txt")
+    n = 6
+    use_old = True
+    f = open("sc_train.txt")
     text = f.read()
     f.close()
-    f = open("sd_valid.txt")
+    f = open("sc_test.txt")
     vtext = f.read()
     f.close()
     final_vocab, merge_rules,vocabold = vocab_setup(text,use_old,n_merges=200,extra_runtime=200)
@@ -76,11 +76,11 @@ if __name__ == "__main__":
     modeln = ngram.y_grammodel(n,tt)
     modeln.train()
     print("Modelensemble Generated")
-    perplexity = evaluator(tt,modeln,n)
-    print("Evaluated Train: Perplexity: "+ str(perplexity[0])+" Mean Prob:"+str(perplexity[1]))
-    perplexity = evaluator(vtt,modeln,n)
-    print("Evaluated Valid: Perplexity: "+ str(perplexity[0])+" Mean Prob:"+str(perplexity[1]))
-    # print(sentencegen(("i",),modeln,100)) 
+    #perplexity = evaluator(tt,modeln,n)
+    #print("Evaluated Train: Perplexity: "+ str(perplexity[0])+" Mean Prob:"+str(perplexity[1]))
+    #perplexity = evaluator(vtt,modeln,n)
+    #print("Evaluated Valid: Perplexity: "+ str(perplexity[0])+" Mean Prob:"+str(perplexity[1]))
+    print(sentencegen(("i",),modeln,100,top=10)) 
     #print(modeln.probs(("con",)))
     #print(tl[0:3])
     #print(tuple(tl[0:3]))

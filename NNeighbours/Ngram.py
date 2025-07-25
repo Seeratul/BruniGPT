@@ -1,6 +1,7 @@
 import collections
 import json
 from typing import List, Tuple, Dict
+import random
 
 def generate_ngram_model(n: int, samplett: List[str]) -> Dict[Tuple[str, ...], List[Tuple[str, int]]]:
     """
@@ -107,6 +108,21 @@ class y_grammodel:
     def generate(self,tokens):
         probs = self.probs(tokens)
         return  max(probs, key=probs.get)
+    
+    def generate_rand(self,tokens,topn):
+        probs = self.probs(tokens)
+        total = 0
+        probs2 = {}
+        c = 0
+        for i in probs:
+            total += (probs[i])
+            probs2[i]= probs[i]
+            c+=1
+            if c >= topn:
+                break
+        for j in probs2:
+            probs2[j] = probs2[j]*(1/total)
+        return  random.choices(list(probs2.keys()), weights=list(probs2.values()), k=1)[0]
        
 
 

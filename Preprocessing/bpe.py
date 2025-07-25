@@ -24,9 +24,6 @@ def tokenization_dict(text):
 
     return word_counts
 
-
-
-
 def tokenization_list(text,merge_rules):
     #There is a workaround in here i really dont like but well
     change = True
@@ -54,14 +51,11 @@ def tokenization_list(text,merge_rules):
             i+=1
             continue
         a="".join(textlist[i+1:min(i+5,len(textlist))])
-        for j in range(len(merge_dict[textlist[i]])):
+        for j in range(len(a),0,-1):
             #This used to be a one liner
-            b = merge_dict[textlist[i]][j]
-            aj =a[:len(b)]
-            if (aj==b):
-                for k in range(len(b)):
-                    textlist[i] = textlist[i]+textlist[i+1]
-                    textlist.pop(i+1)
+            aj =a[:j+1]
+            if (aj in merge_dict[textlist[i]]):
+                textlist= textlist[0:i]+[textlist[i]+aj]+textlist[i+j+1:]
                 break
         i+=1
     #This break symbol will continue to be a problem
@@ -220,6 +214,7 @@ def tokencounter(text):
     
     return len(textlist)
 
+
 if __name__ == "__main__":
     # Example usage of the full tokenization_dict and BPE pipeline
     sample_text = "houe houe houing sewing sewing"
@@ -229,8 +224,11 @@ if __name__ == "__main__":
     final_vocab, merge_rules,vocabold = preprocessing(sample_text,8,0)
     mr = merge_rules.copy()
     tl = tokenization_list(sample_text,mr)
-    print(merge_rules)
+    #print(merge_rules)
+    #print(merge_rules)
     print(tl)
+    #print(len(tl))
+    #print(len(sample_text))
     #print(tl)
     #print("compression rate "+ str(tokencounter(sample_text)/len(tl)))
 
