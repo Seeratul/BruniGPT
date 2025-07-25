@@ -72,9 +72,7 @@ class y_grammodel:
     
     def probs(self,tokens):
         casedict = {}
-        print(self.nm)
         tl = len(tokens)
-        print(tl)
         if(tl>self.nm-1):
             print("Input is longer than n-1 meaning part of it will be ignored")
             tokens = tokens[tl-(self.nm-1):tl]
@@ -92,8 +90,6 @@ class y_grammodel:
                 casedict[i] += self.ngram_dict[0][()][i]*0.1
             return casedict
         elif(tl==1):
-            print(self.ngram_dict[1])
-            return(0)
             for i in self.ngram_dict[tl-1][()]:
                 casedict[i] = self.ngram_dict[1][tokens][i]*0.6
                 casedict[i] = self.ngram_dict[0][()][i]*0.3
@@ -102,7 +98,7 @@ class y_grammodel:
             casedict = self.ngram_dict[tl][()]
             return casedict
         else:
-            raise Exception('Something went horribly wrong in y gram model with your input.')
+            raise Exception('Something went horribly wrong in y_grammodel with your input.')
             
     def evaluate(self,tokens,target):
         probs = self.probs(tokens)
@@ -111,6 +107,7 @@ class y_grammodel:
     def generate(self,tokens):
         probs = self.probs(tokens)
         return  max(probs, key=probs.get)
+       
 
 
 

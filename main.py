@@ -52,26 +52,23 @@ def sentencegen(text,ngram_model,n):
     return text
 
 if __name__ == "__main__":
-    n = 4
-    use_old = False
+    n = 10
+    use_old = True
     f = open("shakes.txt")
     text = f.read()
     f.close()
-    final_vocab, merge_rules,vocabold = vocab_setup(text,use_old,n_merges=40,extra_runtime=0)
+    final_vocab, merge_rules,vocabold = vocab_setup(text,use_old,n_merges=200,extra_runtime=300)
     print("Vocab Setup Done")
-    print(len(final_vocab-vocabold))
-    """"
     tl = tokenizetext(text,merge_rules,use_old)
     print("Tokenization Done")
     print("compression rate "+ str(bpe.tokencounter(text)/len(tl)))
     modeln = ngram.y_grammodel(n,tl)
     modeln.train()
     print("Modelensemble Generated")
-    perplexity = evaluator(tl,modeln,n)
-    print("Evaluated!!:) Perplexity: "+ str(perplexity[0])+" Mean Prob:"+str(perplexity[1]))
-    #print(sentencegen(("i",),modeln,100))
-    
-    print(modeln.probs(("con",)))
+    #perplexity = evaluator(tl,modeln,n)
+    #print("Evaluated!!:) Perplexity: "+ str(perplexity[0])+" Mean Prob:"+str(perplexity[1]))
+    print(sentencegen(("i",),modeln,100)) 
+    #print(modeln.probs(("con",)))
     #print(tl[0:3])
     #print(tuple(tl[0:3]))
-    """
+

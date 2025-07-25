@@ -24,6 +24,9 @@ def tokenization_dict(text):
 
     return word_counts
 
+
+
+
 def tokenization_list(text,merge_rules):
     #There is a workaround in here i really dont like but well
     change = True
@@ -40,7 +43,7 @@ def tokenization_list(text,merge_rules):
             merge_dict[merge_rules[i][0]].append(merge_rules[i][1])
         else:
             merge_dict[merge_rules[i][0]] = [merge_rules[i][1]]
-
+        merge_dict[merge_rules[i][0]].sort(reverse=True,key = len)
     i = 0
     while (i <len(textlist)):
         if (i%10000==0):
@@ -49,7 +52,7 @@ def tokenization_list(text,merge_rules):
         if textlist[i] not in merge_dict:
             i+=1
             continue
-        a="".join(textlist[i+1:min(i+30,len(textlist))])
+        a="".join(textlist[i+1:min(i+5,len(textlist))])
         for j in range(len(merge_dict[textlist[i]])):
             #This used to be a one liner
             b = merge_dict[textlist[i]][j]
@@ -147,7 +150,6 @@ def bpe(word_counts, num_merges,extra_runtime=0,frac = 0):
         vocab = merge_vocab(best_pair, vocab)
 
     for i in range(extra_runtime):
-        raise ValueError('You shouldnt be here')
         stats, symboln = get_stats(vocab)
         if (stats == {}):
             raise ValueError('Your merge number leads back to all full words.')
@@ -178,20 +180,12 @@ def bpe(word_counts, num_merges,extra_runtime=0,frac = 0):
             vocab = merge_vocab(best_pair, vocab)
 
         else:
-            print("Tokens Fully Optimized")
+            print("Tokens Fully Optimized after "+str(i)+" iterations")
             break
-
-            #print(merges)
-            #print(symboln[key])
-       #if (stats[max(stats, key=stats.get)]>):
-           
-        #if stats[max(stats, key=stats.get)]:
-            #return 0
     print("All merges performed")
 
     # 5. Create the final token vocabulary from the keys of the learned vocab
     final_tokens = set()
-
     for word in vocab.keys():
         final_tokens.update(word.split(' '))
     return final_tokens, merges,startingvocab
@@ -227,16 +221,15 @@ def tokencounter(text):
 
 if __name__ == "__main__":
     # Example usage of the full tokenization_dict and BPE pipeline
-    newtext = False
-    tl= False
     sample_text = "houe houe houing sewing sewing"
     #f = open("shakes.txt")
     #sample_text = f.read()
     #f.close()
-    final_vocab, merge_rules,vocabold = preprocessing(sample_text,6,0)
-    tl = tokenization_list(sample_text,merge_rules)
+    final_vocab, merge_rules,vocabold = preprocessing(sample_text,8,0)
+    mr = merge_rules.copy()
+    tl = tokenization_list(sample_text,mr)
     print(merge_rules)
-    print(final_vocab)
+    print(tl)
     #print(tl)
     #print("compression rate "+ str(tokencounter(sample_text)/len(tl)))
 
