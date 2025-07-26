@@ -59,15 +59,15 @@ def sentencegen(text,modeln,n,top = 1):
     return text
 
 if __name__ == "__main__":
-    n = 6
+    n = 4
     use_old = True
-    f = open("sc_train.txt")
+    f = open("sd_train.txt")
     text = f.read()
     f.close()
-    f = open("sc_test.txt")
+    f = open("sd_valid.txt")
     vtext = f.read()
     f.close()
-    final_vocab, merge_rules,vocabold = vocab_setup(text,use_old,n_merges=200,extra_runtime=200)
+    final_vocab, merge_rules,vocabold = vocab_setup(text,use_old,n_merges=400,extra_runtime=400)
     print("Vocab Setup Done")
     tt,vtt = tokenizetext(text,vtext,merge_rules,use_old)
     print("Tokenization Done")
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     #print("Evaluated Train: Perplexity: "+ str(perplexity[0])+" Mean Prob:"+str(perplexity[1]))
     #perplexity = evaluator(vtt,modeln,n)
     #print("Evaluated Valid: Perplexity: "+ str(perplexity[0])+" Mean Prob:"+str(perplexity[1]))
-    print(sentencegen(("i",),modeln,100,top=10)) 
+    print(sentencegen(("i",),modeln,10,top=10)) 
     #print(modeln.probs(("con",)))
     #print(tl[0:3])
     #print(tuple(tl[0:3]))

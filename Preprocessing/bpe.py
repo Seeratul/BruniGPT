@@ -29,6 +29,8 @@ def tokenization_list(text,merge_rules):
     change = True
     merge_rules = merge_rules.copy()
     merge_dict = {}
+    editlist =[]
+    k= 0
     #split and set lower case
     words = text.lower().split()
     #tokenize leaving an artifact list

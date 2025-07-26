@@ -32,7 +32,7 @@ def generate_ngram_model(n: int, samplett: List[str]) -> Dict[Tuple[str, ...], L
     # Use defaultdict with a Counter for efficient nested counting.
     # The key will be the context (a tuple of n-1 words), and the value
     # will be a Counter for the words that follow that context.
-    ngram_counts = collections.defaultdict(collections.Counter)
+    ngram_counts = {}
     # Iterate through the tokens to build n-grams.
     # We stop at the point where the last full n-gram can be formed.
     for i in range(len(samplett) - n + 1):
@@ -40,7 +40,14 @@ def generate_ngram_model(n: int, samplett: List[str]) -> Dict[Tuple[str, ...], L
         context = tuple(samplett[i : i + n - 1])
         # The target word is the nth word in the sequence.
         following_word = samplett[i + n - 1]
-        ngram_counts[context][following_word] += 1
+        if (context in ngram_counts.keys()):
+            if (following_word in ngram_counts[context].keys()):
+                ngram_counts[context][following_word] += 1
+            else:
+                ngram_counts[context][following_word] = 1
+        else:
+            ngram_counts[context] = {}
+            ngram_counts[context][following_word] = 1
 
     for i in (ngram_counts):
         total = 0
@@ -78,22 +85,34 @@ class y_grammodel:
             print("Input is longer than n-1 meaning part of it will be ignored")
             tokens = tokens[tl-(self.nm-1):tl]
             tl = len(tokens)
+        while (tokens not in self.ngram_dict[tl].keys()):
+            tokens = tokens[1:tl]
+            tl = len(tokens)
+
         if(tl>= 3):
             for i in self.ngram_dict[tl-2][tokens[2:]]:
-                casedict[i] = self.ngram_dict[tl][tokens][i]*0.6
-                casedict[i] += self.ngram_dict[tl-1][tokens[1:]][i]*0.2
+                casedict[i]= 0
                 casedict[i] += self.ngram_dict[tl-2][tokens[2:]][i]*0.1
+            for i in self.ngram_dict[tl-1][tokens[1:]]:
+                casedict[i] += self.ngram_dict[tl-1][tokens[1:]][i]*0.2
+            for i in self.ngram_dict[tl][tokens]:
+                casedict[i] += self.ngram_dict[tl][tokens][i]*0.6
             return casedict
         elif(tl==2):
-            for i in self.ngram_dict[tl-2][()]:
-                casedict[i] = self.ngram_dict[2][tokens][i]*0.6
-                casedict[i] += self.ngram_dict[1][tokens[1:]][i]*0.2
+            for i in self.ngram_dict[0][()]:
+                casedict[i]= 0
                 casedict[i] += self.ngram_dict[0][()][i]*0.1
+            for i in self.ngram_dict[tl-1][tokens[1:]]:
+                casedict[i] += self.ngram_dict[tl-1][tokens[1:]][i]*0.2
+            for i in self.ngram_dict[tl][tokens]:
+                casedict[i] += self.ngram_dict[tl][tokens][i]*0.6
             return casedict
         elif(tl==1):
-            for i in self.ngram_dict[tl-1][()]:
-                casedict[i] = self.ngram_dict[1][tokens][i]*0.6
-                casedict[i] = self.ngram_dict[0][()][i]*0.3
+            for i in self.ngram_dict[0][()]:
+                casedict[i]= 0
+                casedict[i] += self.ngram_dict[0][()][i]*0.3
+            for i in self.ngram_dict[tl][tokens]:
+                casedict[i] += self.ngram_dict[tl][tokens][i]*0.6
             return casedict
         elif(tl==0):
             casedict = self.ngram_dict[tl][()]
@@ -103,6 +122,8 @@ class y_grammodel:
             
     def evaluate(self,tokens,target):
         probs = self.probs(tokens)
+        if(target not in probs.keys()):
+            return 0
         return probs[target]
     
     def generate(self,tokens):
