@@ -6,7 +6,7 @@ import TestingUtils.utils as utils
 import numpy as np
 
 
-def hpo(text,vtext,square = 5,merge_min=200,merge_max=2100,nmin=2,nmax=18,extra=True):
+def hpo(text,vtext,square = 5,merge_min=200,merge_max=2100,nmin=2,nmax=10,extra=True):
     
     results = [[] for x in range(square+1)]
     etmin = 0
@@ -51,11 +51,11 @@ if __name__ == "__main__":
     f = open("sd_valid.txt")
     vtext = f.read()
     f.close()
-    results = hpo(text,vtext)
-
-    print(results[0])
-    print(results[1])
-    print(results[2])
-    print(results[3])
-    print(results[4])
-    print(results[5])
+    #results = hpo(text,vtext)
+    with open("ntester.pkl", "rb") as fp:
+        results=pickle.load(fp)
+    fp.close()
+    #print(results[1][1][0])
+    for i in range(6):
+       print(str("%.2f" %results[0][i][0])+str("%.2f" % results[0][i][1][0])+str("%.2f" %results[0][i][2][0])+str("%.2f" %results[0][i][3][0])+str("%.2f" % results[0][i][4][0])+str("%.2f" % results[0][i][5][0]))
+  

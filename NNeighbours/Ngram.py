@@ -64,6 +64,8 @@ def generate_ngram_model(n: int, samplett: List[str]) -> Dict[Tuple[str, ...], L
     return ngram_counts
 
 class y_grammodel:
+    #14+grams need 8+gb of free ram. 10 should be my practical max
+    
     def __init__(self,n: int, samplett):
         self.nm = n
         self.samplett = samplett
