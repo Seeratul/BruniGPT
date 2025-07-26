@@ -60,7 +60,7 @@ def sentencegen(text,modeln,n,top = 1):
 
 if __name__ == "__main__":
     n = 4
-    use_old = True
+    use_old = False
     f = open("sd_train.txt")
     text = f.read()
     f.close()
