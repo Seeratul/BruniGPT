@@ -85,6 +85,9 @@ class y_grammodel:
             print("Input is longer than n-1 meaning part of it will be ignored")
             tokens = tokens[tl-(self.nm-1):tl]
             tl = len(tokens)
+
+        #This while statement likes to crash when you didnt do ngramdict.train()
+        #Wdym exceptions? Never heard of em
         while (tokens not in self.ngram_dict[tl].keys()):
             tokens = tokens[1:tl]
             tl = len(tokens)

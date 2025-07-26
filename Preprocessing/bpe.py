@@ -1,4 +1,5 @@
 import copy
+import pickle
 
 def tokenization_dict(text):
     """
@@ -234,6 +235,33 @@ def tokencounter(text):
     
     return len(textlist)
 
+def vocab_setup(sample_text,save=False,use_old=False,n_merges= 300,extra_runtime=2000):
+    if(use_old):
+        with open("vocab.pkl", "rb") as fp:
+            final_vocab,merge_rules,vocabold=pickle.load(fp)
+            fp.close()
+    else:
+        final_vocab, merge_rules,vocabold = preprocessing(sample_text,n_merges,extra_runtime)
+        if save:
+            with open("vocab.pkl", "wb") as fp:
+                pickle.dump([final_vocab,merge_rules,vocabold],fp)
+            fp.close()
+    return final_vocab, merge_rules,vocabold
+
+def tokenizetext(text,filename,merge_rules,save=False,use_old=False):
+    if(use_old):
+        with open(filename, "rb") as fp:
+            tl=pickle.load(fp)
+        fp.close()
+        return tl
+
+    else:
+        tl = tokenization_list(text,merge_rules)
+        if save:
+            with open(filename, "wb") as fp:
+                pickle.dump(text,fp)
+            fp.close()
+        return tl
 
 if __name__ == "__main__":
     # Example usage of the full tokenization_dict and BPE pipeline
