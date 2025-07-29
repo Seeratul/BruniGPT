@@ -271,12 +271,13 @@ if __name__ == "__main__":
     #f.close()
     final_vocab, merge_rules,vocabold = preprocessing(sample_text,8,0)
     mr = merge_rules.copy()
+    print(mr)
     tl = tokenization_list(sample_text,mr)
     #print(merge_rules)
     #print(merge_rules)
     #print(len(tl))
     #print(len(sample_text))
-    #print(tl)
+    print(tl)
     #print("compression rate "+ str(tokencounter(sample_text)/len(tl)))
 
  

@@ -7,7 +7,7 @@ def evaluator(text,ngram_model,n):
 
     test = True
     for i in range(len(text)-n):
-        perplexity += np.log2(max(ngram_model.evaluate(tuple(text[i-n:i]),text[i]),0.00001))
+        perplexity += np.log2(max(ngram_model.evaluate(tuple(text[i-n:i]),text[i]),0.000000000000001))
         probs.extend([ngram_model.evaluate(tuple(text[i-n:i]),text[i])])
     mean_prob = np.mean(probs)
     perplexity = perplexity/i
