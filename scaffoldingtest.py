@@ -1,6 +1,9 @@
 import Neuralgram.scaffolding as scaf
 import torch
 import Preprocessing.bpe as bpe
+import random
+import numpy as np
+
 
 if __name__ == "__main__":
     #Feeds pre bpe´d text in
@@ -14,15 +17,32 @@ if __name__ == "__main__":
     trans= scaf.stoitos(final_vocab)
     tte=trans.encode(tt)
     x,y = scaf.get_batch(torch.tensor(tte))
-    m = scaf.BigramLM(len(final_vocab))
+    m = scaf.FSBigramLM(len(final_vocab))
+    ll = []
+
+     
+    for steps in range(10000):
+        i = random.randint(0,len(tte)-1)
+        ohin =np.zeros((len(final_vocab),1))
+        ohtar = np.zeros((len(final_vocab),1))
+        ohin[tte[i]] = 1
+        ohtar[tte[i+1]] = 1
+        logitx,loss = m.forward(ohin,ohtar)
+        m.backwards(ohin, ohtar,logitx)
+        ll.append(max(loss[0]))
+        if (steps%400==0):
+            print(steps)
+            print(min(ll))
     
-    #Sentencegen
+    """
     starting_c = torch.zeros((1,1),dtype=torch.long)
     generated_c = m.generate(idx=starting_c,max_new_tokens=100)
     generated_c = generated_c[0].tolist()
     decoded_c = trans.decode(generated_c)
     print(decoded_c)
+    """
     
+
 
 
     """
@@ -48,5 +68,4 @@ if __name__ == "__main__":
     generated_c = generated_c[0].tolist()
     decoded_c = trans.decode(generated_c)
     print(decoded_c)
-
     """

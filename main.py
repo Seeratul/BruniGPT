@@ -1,7 +1,7 @@
 import pickle
 from collections import defaultdict
 import Preprocessing.bpe as bpe
-import NNeighbours.Ngram as ngram
+import NGram.Ngram as ngram
 import TestingUtils.utils as utils
 import numpy as np
 
