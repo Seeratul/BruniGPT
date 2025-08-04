@@ -1,6 +1,6 @@
 import pickle
 from collections import defaultdict
-import Preprocessing.bpe as bpe
+import Task1.bpe as bpe
 import NGram.Ngram as ngram
 import TestingUtils.utils as utils
 import numpy as np
@@ -23,14 +23,6 @@ if __name__ == "__main__":
     print("Tokenization Done")
     print("compression rate in train "+ str(bpe.tokencounter(text)/len(tt)))
     print("compression rate in vaild "+ str(bpe.tokencounter(vtext)/len(vtt)))
-    modeln = ngram.y_grammodel(n,tt)
-    modeln.train()
-    print("Modelensemble Generated")
-    perplexity = utils.evaluator(tt,modeln,n)
-    print("Evaluated Train: Perplexity: "+ str(perplexity[0])+" Mean Prob:"+str(perplexity[1]))
-    perplexity = utils.evaluator(vtt,modeln,n)
-    print("Evaluated Valid: Perplexity: "+ str("%.2f" % perplexity[0])+" Mean Prob:"+str("%.2f" %perplexity[1]))
-    print(utils.sentencegen(("i",),modeln,100,top=10)) 
     #print(modeln.probs(("con",)))
     #print(tl[0:3])
     #print(tuple(tl[0:3]))

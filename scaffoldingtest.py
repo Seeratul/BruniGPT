@@ -1,6 +1,6 @@
 import Neuralgram.scaffolding as scaf
 import torch
-import Preprocessing.bpe as bpe
+import Task1.bpe as bpe
 import random
 import numpy as np
 
