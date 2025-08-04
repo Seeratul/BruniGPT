@@ -84,7 +84,7 @@ class y_grammodel:
         casedict = {}
         tl = len(tokens)
         if(tl>self.nm-1):
-            print("Input is longer than n-1 meaning part of it will be ignored")
+            #print("Input is longer than n-1 meaning part of it will be ignored")
             tokens = tokens[tl-(self.nm-1):tl]
             tl = len(tokens)
 

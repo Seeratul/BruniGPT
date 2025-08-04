@@ -26,15 +26,13 @@ def tokenization_dict(text):
 
 def tokenization_list(text,merge_rules):
     #There is a workaround in here i really dont like but well
-    change = True
-    merge_rules = merge_rules.copy()
+    merge_rules = copy.deepcopy(merge_rules)
     merge_dict = {}
     editlist =[]
     savedlist = []
     lastload= 0
     ineditlist = 0
     inlist = 0
-    hit = False
     lastload = inlist
     #split and set lower case
     words = text.lower().split()
@@ -42,6 +40,7 @@ def tokenization_list(text,merge_rules):
     textlist = [list(word+" ") for word in words]
     #removing artifact list
     textlist = [x for xs in textlist for x in xs]
+
 
     for i in range(len(merge_rules)):
         merge_rules[i] = (merge_rules[i][0][0],merge_rules[i][0][1:]+merge_rules[i][1].replace('</w>'," "))
@@ -71,8 +70,8 @@ def tokenization_list(text,merge_rules):
             #This used to be a one liner
             aj =a[:j+1]
             if (aj in merge_dict[editlist[ineditlist]]):
-                editlist= editlist[0:ineditlist]+[editlist[ineditlist]+aj]+editlist[ineditlist+j+1:]
-                inlist+=j+1
+                editlist= editlist[0:ineditlist]+[editlist[ineditlist]+aj]+editlist[ineditlist+j+2:]
+                inlist+=j+2
                 ineditlist+=1
                 break
         else: # only executed if the inner loop did NOT break
@@ -80,8 +79,75 @@ def tokenization_list(text,merge_rules):
             ineditlist+=1
     savedlist= savedlist+editlist
     #This break symbol will continue to be a problem
-    savedlist = [w.replace(' ', '</w>') for w in savedlist]              
+    savedlist = [w.replace(" ", '</w>') for w in savedlist]              
     return savedlist
+
+def vtokenization_list(text,merge_rules):
+    #There is a workaround in here i really dont like but well
+    merge_rules = copy.deepcopy(merge_rules)
+    merge_dict = {}
+    editlist =[]
+    savedlist = []
+    lastload= 0
+    ineditlist = 0
+    inlist = 0
+    lastload = inlist
+    #split and set lower case
+    words = text.lower().split()
+    #tokenize leaving an artifact list
+    textlist = [list(word+" ") for word in words]
+    #removing artifact list
+    textlist = [x for xs in textlist for x in xs]
+    print(textlist)
+
+
+    for i in range(len(merge_rules)):
+        merge_rules[i] = (merge_rules[i][0][0],merge_rules[i][0][1:]+merge_rules[i][1].replace('</w>'," "))
+        if  merge_rules[i][0] in merge_dict:
+            merge_dict[merge_rules[i][0]].append(merge_rules[i][1])
+        else:
+            merge_dict[merge_rules[i][0]] = [merge_rules[i][1]]
+        merge_dict[merge_rules[i][0]].sort(reverse=True,key = len)
+    
+    print(merge_dict)
+    print(len(textlist))
+    print(inlist)
+    editlist =copy.deepcopy(textlist[inlist:min(inlist+10010,len(textlist))])
+    while (inlist<len(textlist)):
+        if (inlist>=lastload+10000):
+            ineditlist= 0
+            lastload = inlist
+            print(len(textlist))
+            print(inlist)
+            savedlist = savedlist+editlist
+            editlist = copy.deepcopy(textlist[inlist:min(inlist+10010,len(textlist))])
+        if editlist[ineditlist] not in merge_dict:
+            ineditlist+=1
+            inlist+=1
+            continue
+        a="".join(editlist[ineditlist+1:min(ineditlist+5,len(editlist))])
+        for j in range(len(a),0,-1):
+            aj =a[:j+1]
+            if (aj in merge_dict[editlist[ineditlist]]):
+                print(aj)
+                print(editlist)
+                print(editlist[0:ineditlist])
+                print(editlist[ineditlist]+aj)
+                print(editlist[ineditlist+j+2:])
+                editlist= editlist[0:ineditlist]+[editlist[ineditlist]+aj]+editlist[ineditlist+j+2:]
+                print(editlist)
+                inlist+=j+2
+                ineditlist+=1
+                break
+        else: # only executed if the inner loop did NOT break
+            inlist+=1
+            ineditlist+=1
+    print(savedlist)
+    savedlist= savedlist+editlist
+    #This break symbol will continue to be a problem
+    savedlist = [w.replace(" ", '</w>') for w in savedlist]              
+    return savedlist
+
 
 def get_stats(vocab,speedbump=5):
     """Count frequencies of adjacent pairs in the vocabulary."""
@@ -245,14 +311,14 @@ def tokenizetext(text,merge_rules):
 
 if __name__ == "__main__":
     # Example usage of the full tokenization_dict and BPE pipeline
-    sample_text = "houe houe houing sewing sewing houe houe houing sewing sewing houe houe houing sewing sewing houe houe houing sewing sewing houe houe houing sewing sewing"
+    sample_text = "shall i1,shall i2,shall i3"
     #f = open("shakes.txt")
     #sample_text = f.read()
     #f.close()
-    final_vocab, merge_rules,vocabold = preprocessing(sample_text,8,0)
-    mr = merge_rules.copy()
+    final_vocab, merge_rules,vocabold = preprocessing(sample_text,2,0)
+    mr = merge_rules
     print(mr)
-    tl = tokenization_list(sample_text,mr)
+    tl = vtokenization_list(sample_text,mr)
     #print(merge_rules)
     #print(merge_rules)
     #print(len(tl))

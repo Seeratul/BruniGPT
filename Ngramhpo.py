@@ -52,10 +52,10 @@ if __name__ == "__main__":
     vtext = f.read()
     f.close()
     square = 10
-    results = [hpo(text,vtext,square=square,merge_min=0,merge_max=5000,nmin=1,nmax=10,extra=True)]
-    #with open("ntester.pkl", "rb") as fp:
-    #   results=pickle.load(fp)
-    #fp.close()
+    #results = [hpo(text,vtext,square=square,merge_min=0,merge_max=4500,nmin=1,nmax=10,extra=True)]
+    with open("ntester.pkl", "rb") as fp:
+       results=pickle.load(fp)
+    fp.close()
    
    
     for i in range(square):

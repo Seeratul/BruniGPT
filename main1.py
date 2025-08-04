@@ -17,5 +17,12 @@ if __name__ == "__main__":
     print("Tokenization Done")
     print("Compression rate (nb) in train "+ str(bpe.tokencounter(text)/len(tt)))
     print("Compression rate (nb) in vaild "+ str(bpe.tokencounter(vtext)/len(vtt)))
+    final_vocab, merge_rules,vocabold = bpe.vocab_setup(text,n_merges=n,extra_runtime=n-1)
+    print("Vocab Setup Done")
+    tt = bpe.tokenizetext(text,merge_rules)
+    vtt = bpe.tokenizetext(vtext,merge_rules)
+    print("Tokenization Done")
+    print("Compression rate (b) in train "+ str(bpe.tokencounter(text)/len(tt)))
+    print("Compression rate (b) in vaild "+ str(bpe.tokencounter(vtext)/len(vtt)))
 
 
