@@ -1,7 +1,7 @@
 import pickle
 from collections import defaultdict
 import Preprocessing.bpe as bpe
-import NNeighbours.Ngram as ngram
+import NGram as ngram
 import TestingUtils.utils as utils
 import numpy as np
 
@@ -44,7 +44,7 @@ def hpo(text,vtext,square = 5,merge_min=200,merge_max=2100,nmin=2,nmax=10,extra=
 
 
 if __name__ == "__main__":
-    #n = 4
+    n = 4
     f = open("sc_train.txt")
     text = f.read()
     f.close()
@@ -52,10 +52,10 @@ if __name__ == "__main__":
     vtext = f.read()
     f.close()
     square = 3
-    results = [hpo(text,vtext,square=square,merge_min=2000,merge_max=4000,nmin=3,nmax=5,extra=True)]
-    #with open("ntester.pkl", "rb") as fp:
-    #    results=pickle.load(fp)
-    #fp.close()
+    #results = [hpo(text,vtext,square=square,merge_min=2000,merge_max=4000,nmin=3,nmax=5,extra=True)]
+    with open("ntester.pkl", "rb") as fp:
+       results=pickle.load(fp)
+    fp.close()
    
    
     for i in range(square):

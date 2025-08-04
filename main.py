@@ -15,6 +15,7 @@ if __name__ == "__main__":
     f = open("sc_valid.txt")
     vtext = f.read()
     f.close()
+    print("Files read")
     final_vocab, merge_rules,vocabold = bpe.vocab_setup(text,use_old,n_merges=4000,extra_runtime=4000)
     print("Vocab Setup Done")
     tt = bpe.tokenizetext(text,("tl.pkl"),merge_rules,use_old)

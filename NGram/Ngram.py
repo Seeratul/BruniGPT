@@ -99,7 +99,7 @@ class y_grammodel:
                 casedict[i]= 0
                 casedict[i] += self.ngram_dict[tl-2][tokens[2:]][i]*0.1
             for i in self.ngram_dict[tl-1][tokens[1:]]:
-                casedict[i] += self.ngram_dict[tl-1][tokens[1:]][i]*0.2
+                casedict[i] += self.ngram_dict[tl-1][tokens[1:]][i]*0.3
             for i in self.ngram_dict[tl][tokens]:
                 casedict[i] += self.ngram_dict[tl][tokens][i]*0.6
             return casedict
@@ -108,14 +108,14 @@ class y_grammodel:
                 casedict[i]= 0
                 casedict[i] += self.ngram_dict[0][()][i]*0.1
             for i in self.ngram_dict[tl-1][tokens[1:]]:
-                casedict[i] += self.ngram_dict[tl-1][tokens[1:]][i]*0.2
+                casedict[i] += self.ngram_dict[tl-1][tokens[1:]][i]*0.3
             for i in self.ngram_dict[tl][tokens]:
                 casedict[i] += self.ngram_dict[tl][tokens][i]*0.6
             return casedict
         elif(tl==1):
             for i in self.ngram_dict[0][()]:
                 casedict[i]= 0
-                casedict[i] += self.ngram_dict[0][()][i]*0.3
+                casedict[i] += self.ngram_dict[0][()][i]*0.4
             for i in self.ngram_dict[tl][tokens]:
                 casedict[i] += self.ngram_dict[tl][tokens][i]*0.6
             return casedict

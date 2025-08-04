@@ -8,11 +8,15 @@ import torch.nn as nn
 from torch.nn import functional as F
 from torch.utils.data import Dataset
 from torch.utils.data.dataloader import DataLoader
+from Preprocessing import bpe
+from Neuralgram import scaffolding as scaf
 import pickle
 import math
 import time
 from collections import defaultdict
 import tiktoken
+from TestingUtils import utils
+
 
 class GPTConfig:
     def __init__(self, vocab_size, **kwargs):
@@ -31,10 +35,10 @@ class CustomConfig(GPTConfig):
     compile = False
     device = 'cpu'
     num_workers = 0
-    max_iters = 3e3
+    max_iters = 5e5
     batch_size = 4
     block_size = 64
-    learning_rate = 6e-3
+    learning_rate = 5e-3
     betas = (0.9, 0.95)
     weight_decay = 1e-1
     grad_norm_clip = 1.0
@@ -219,7 +223,7 @@ class GPT(nn.Module):
         return optimizer
 
     def forward(self, idx, targets=None):
-        device = idx.device
+        device = "cpu"
         b, t = idx.size()
         assert t <= self.block_size, f"Cannot forward sequence of length {t}, block size is only {self.block_size}"
 
@@ -349,13 +353,54 @@ class Trainer:
             if config.max_iters is not None and self.iter_num >= config.max_iters:
                 break
 
+class Tester:
+
+    def __init__(self, config, model, dataset):
+        self.config = config
+        self.model = model
+        self.optimizer = None
+        self.dataset = dataset
+        self.callbacks = defaultdict(list)
+        self.device = config.device
+        self.model = self.model.to(self.device)
+
+        # variables that will be assigned to trainer class later for logging and etc
+        self.iter_num = 0
+        self.iter_time = 0.0
+        self.iter_dt = 0.0
+
+    def run(self):
+        model, config = self.model, self.config
+
+        # setup the dataloader
+        loader = DataLoader(
+            self.dataset,
+            sampler=torch.utils.data.RandomSampler(self.dataset, replacement=True, num_samples=int(1e10)),
+            shuffle=False,
+            # pin_memory=True,
+            batch_size=config.batch_size,
+            num_workers=config.num_workers,
+        )
+        self.iter_time = time.time()
+        data_iter = iter(train_loader)
+        # fetch the next batch (x, y) and re-init iterator if needed
+        try:
+            batch = next(data_iter)
+        except StopIteration:
+            data_iter = iter(train_loader)
+            batch = next(data_iter)
+        batch = [t.to(self.device) for t in batch]
+        x, y = batch
+
+        # forward the model
+        logits, self.loss = model(x, y)
+        return self.loss
+
 class ShakespeareDataset(Dataset):
-    def __init__(self, split, block_size=128, device_type='cuda'):
-        assert split in {'train', 'test'}
-        self.split = split
+    def __init__(self, data, block_size=128, device_type='cpu'):
         self.block_size = block_size
         self.device_type = device_type
-        self.data = train_data if split == 'train' else val_data
+        self.data = data
     
     def __len__(self):
         return len(self.data) - self.block_size
@@ -371,75 +416,68 @@ class ShakespeareDataset(Dataset):
             x, y = x.to('cpu'), y.to('cpu')
         return x, y
 
-# download the tiny shakespeare dataset
-data_dir = os.path.join('data', 'tinyshakespeare')
-input_file_path = os.path.join(data_dir, 'input.txt')
-if not os.path.exists(input_file_path):
-    data_url = 'https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt'
-    os.makedirs(data_dir)
-    with open(input_file_path, 'w') as f:
-        f.write(requests.get(data_url).text)
+#DataPrep
+use_old = False
+f = open("sc_train.txt")
+text = f.read()
+f.close()
+f = open("sc_valid.txt")
+vtext = f.read()
+f.close()
+print("Files read")
+final_vocab, merge_rules,vocabold = bpe.vocab_setup(text,use_old,n_merges=4000,extra_runtime=4000)
+print("Vocab Setup Done")
+tt = bpe.tokenizetext(text,("tl.pkl"),merge_rules,use_old)
+vtt = bpe.tokenizetext(vtext,("vtl.pkl"),merge_rules,use_old)
+print("Tokenization Done")
+final_vocab.update(vocabold)
+trans= scaf.stoitos(final_vocab)
+train_dataset=trans.encode(tt)
+test_dataset=trans.encode(vtt)
+train_dataset = np.array(train_dataset)
+test_dataset = np.array(test_dataset)
 
-with open(input_file_path, 'r') as f:
-    data = f.read()
-n = len(data)
-train_data = data[:int(n*0.9)]
-val_data = data[int(n*0.9):]
 
-# encode with tiktoken gpt2 bpe
-enc = tiktoken.get_encoding("gpt2")
-train_ids = enc.encode_ordinary(train_data)
-val_ids = enc.encode_ordinary(val_data)
 
-#At this point it expects a list of ints
-print(f"train has {len(train_ids):,} tokens")
-print(f"val has {len(val_ids):,} tokens")
 
-# export to bin files
-train_ids = np.array(train_ids, dtype=np.uint16)
-val_ids = np.array(val_ids, dtype=np.uint16)
-train_ids.tofile(os.path.join(data_dir, 'train.bin'))
-val_ids.tofile(os.path.join(data_dir, 'val.bin'))
 
-#Prep Vocab
-vocab_size = len(train_ids)
-config = CustomConfig(vocab_size=vocab_size)
-
-#Read from bin 
-# read data from .bin
-data_dir = os.path.join('data', 'tinyshakespeare')
-train_data = np.memmap(os.path.join(data_dir, 'train.bin'), dtype=np.uint16, mode='r')
-val_data = np.memmap(os.path.join(data_dir, 'val.bin'), dtype=np.uint16, mode='r')
 #Expected Dataset shape:
-#At this point it expects a list of ints
-#train_dataset = []
-#test_dataset =  []
+#At this point it expects a np.ndarray of ints
+train_data = train_dataset
+val_data = test_dataset
+#vocab_size = len(train_dataset)
+config = CustomConfig(vocab_size=len(final_vocab))
 
 
-#Create datasets and loader 
-train_dataset = ShakespeareDataset('train', config.block_size, config.device)
-train_loader = DataLoader(train_dataset, batch_size=config.batch_size, num_workers=config.num_workers, drop_last=False)
-test_dataset = ShakespeareDataset('test', config.block_size, config.device)
-test_loader = DataLoader(test_dataset, batch_size=config.batch_size, num_workers=config.num_workers, drop_last=False)
+#Create datasets and loader torch objects for train and ...
+train_dataset = ShakespeareDataset(train_dataset, config.block_size, config.device)
+train_loader = DataLoader(train_dataset, batch_size=config.batch_size, num_workers=config.num_workers,shuffle=True)
+#..for test
+test_dataset = ShakespeareDataset(test_dataset, config.block_size, config.device)
+test_loader = DataLoader(test_dataset, batch_size=config.batch_size, num_workers=config.num_workers,shuffle=True)
+
+
+
+
 
 model = GPT(config).to(config.device)
 if config.compile:
     model = torch.compile(model)
 trainer = Trainer(config, model, train_dataset)
+tester = Tester(config, model, test_dataset)
 
-print("N classes"+str(len(train_ids)))
+
 
 def batch_end_callback(trainer):
     if trainer.iter_num % 500 == 0:
         print(f"iter_dt {trainer.iter_dt * 1000:.2f}ms; iter {trainer.iter_num}: train loss {trainer.loss.item():.5f}")
+        print("test loss "+ str(Tester.run(tester).item()))
 trainer.set_callback('on_batch_end', batch_end_callback)
 trainer.run()
-
-vocab_size = len(train_ids)
-config = CustomConfig(vocab_size=vocab_size)
-
-text = 'Lord:\nRise! My people, conquer the north!'
-sample_ids = torch.Tensor(enc.encode_ordinary(text)).long()
+text = 'Lord: Rise! My people, conquer the north!'
+text = bpe.tokenizetext(text,("taaa.pkl"),merge_rules,use_old)
+sample_ids = torch.Tensor(trans.encode(text)).long()
 sample_ids = torch.unsqueeze(sample_ids, 0).to(config.device)
-result = model.generate(sample_ids, max_new_tokens=50, temperature=1, do_sample=False, top_k=None)
-print(enc.decode(result.detach().cpu().tolist()[0]))
+print(sample_ids)
+result = model.generate(sample_ids, max_new_tokens=1, temperature=1, do_sample=False, top_k=None)
+print(trans.decode(result.detach().cpu().tolist()[0]))
