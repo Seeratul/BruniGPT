@@ -1,12 +1,12 @@
 import pickle
 from collections import defaultdict
 import Task1.bpe as bpe
-import NGram as ngram
-import TestingUtils.utils as utils
+import Task2.Ngram as ngram
+import Task2.utils as utils
 import numpy as np
 
 
-def hpo(text,vtext,square = 5,merge_min=200,merge_max=2100,nmin=2,nmax=10,extra=True):
+def hpo(text,vtext,square = 10,merge_min=0,merge_max=5000,nmin=0,nmax=10,extra=True):
     
     results = [[] for x in range(square+1)]
     etmin = 0
@@ -21,9 +21,9 @@ def hpo(text,vtext,square = 5,merge_min=200,merge_max=2100,nmin=2,nmax=10,extra=
         merges_i = int(merge_min+(merge_max-merge_min)/(square-1)*(i-1))
         et_i =int(etmin+(et-etmin)/(square-1)*(i-1))
         final_vocab, merge_rules,vocabold = bpe.vocab_setup(text,n_merges=merges_i,extra_runtime=et_i)
-        tt = bpe.tokenizetext(text,("tl.pkl"),merge_rules)
+        tt = bpe.tokenizetext(text,merge_rules)
         results[i-1].append(merges_i)
-        vtt = bpe.tokenizetext(vtext,("vtl.pkl"),merge_rules)
+        vtt = bpe.tokenizetext(vtext,merge_rules)
         for j in range(1,square+1):
             print("Inner Run "+str(j)+ " of outer Run " +str(i)+ " started")
             n =int(nmin+(j-1)*(nmax-nmin)/(square-1))
@@ -51,11 +51,11 @@ if __name__ == "__main__":
     f = open("sc_valid.txt")
     vtext = f.read()
     f.close()
-    square = 3
-    #results = [hpo(text,vtext,square=square,merge_min=2000,merge_max=4000,nmin=3,nmax=5,extra=True)]
-    with open("ntester.pkl", "rb") as fp:
-       results=pickle.load(fp)
-    fp.close()
+    square = 10
+    results = [hpo(text,vtext,square=square,merge_min=0,merge_max=5000,nmin=1,nmax=10,extra=True)]
+    #with open("ntester.pkl", "rb") as fp:
+    #   results=pickle.load(fp)
+    #fp.close()
    
    
     for i in range(square):

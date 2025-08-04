@@ -26,7 +26,11 @@ def evaluator(text,model,n,gpt = False):
     return perplexity, mean_prob
 
 def sentencegen(text,modeln,n,top = 1):
+    eost = [".","?","!"]
     while len(text)<n:
         new = (modeln.generate_rand(text,top),)
         text = text+(new[0],)
+        for i in eost:
+            if i in text:
+                return text
     return text

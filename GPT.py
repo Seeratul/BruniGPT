@@ -8,14 +8,14 @@ import torch.nn as nn
 from torch.nn import functional as F
 from torch.utils.data import Dataset
 from torch.utils.data.dataloader import DataLoader
-from Preprocessing import bpe
+from Task1 import bpe
 from Neuralgram import scaffolding as scaf
 import pickle
 import math
 import time
 from collections import defaultdict
 import tiktoken
-from TestingUtils import utils
+from Task2 import utils
 
 
 class GPTConfig:
