@@ -2,7 +2,7 @@ import Task1.bpe as bpe
 
 
 if __name__ == "__main__":
-    n = 2000
+    k = 50
     f = open("sc_train.txt")
     text = f.read()
     f.close()
@@ -10,14 +10,14 @@ if __name__ == "__main__":
     vtext = f.read()
     f.close()
     print("Files read")
-    final_vocab, merge_rules,vocabold = bpe.vocab_setup(text,n_merges=n,extra_runtime=0)
+    final_vocab, merge_rules,vocabold = bpe.vocab_setup(text,n_merges=k,extra_runtime=0)
     print("Vocab Setup Done")
     tt = bpe.tokenizetext(text,merge_rules)
     vtt = bpe.tokenizetext(vtext,merge_rules)
     print("Tokenization Done")
     print("Compression rate (nb) in train "+ str(bpe.tokencounter(text)/len(tt)))
     print("Compression rate (nb) in vaild "+ str(bpe.tokencounter(vtext)/len(vtt)))
-    final_vocab, merge_rules,vocabold = bpe.vocab_setup(text,n_merges=n,extra_runtime=n-1)
+    final_vocab, merge_rules,vocabold = bpe.vocab_setup(text,n_merges=k,extra_runtime=k-1)
     print("Vocab Setup Done")
     tt = bpe.tokenizetext(text,merge_rules)
     vtt = bpe.tokenizetext(vtext,merge_rules)

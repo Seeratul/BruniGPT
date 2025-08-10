@@ -9,7 +9,7 @@ from torch.nn import functional as F
 from torch.utils.data import Dataset
 from torch.utils.data.dataloader import DataLoader
 from Task1 import bpe
-from Neuralgram import scaffolding as scaf
+from Task3 import scaffolding as scaf
 import pickle
 import math
 import time

@@ -1,8 +1,9 @@
-import Neuralgram.scaffolding as scaf
+import Task3.scaffolding as scaf
 import torch
 import Task1.bpe as bpe
 import random
 import numpy as np
+
 
 
 if __name__ == "__main__":
@@ -11,8 +12,8 @@ if __name__ == "__main__":
     f = open("sc_valid.txt")
     text = f.read()
     f.close()
-    final_vocab, merge_rules,vocabold = bpe.vocab_setup(text,use_old,n_merges=1000,extra_runtime=1000)
-    tt = bpe.tokenizetext(text,("tl.pkl"),merge_rules,use_old)
+    final_vocab, merge_rules,vocabold = bpe.vocab_setup(text,n_merges=1000,extra_runtime=1000)
+    tt = bpe.tokenizetext(text,merge_rules)
     final_vocab.update(vocabold)
     trans= scaf.stoitos(final_vocab)
     tte=trans.encode(tt)
@@ -21,7 +22,7 @@ if __name__ == "__main__":
     ll = []
 
      
-    for steps in range(10000):
+    for steps in range(4000):
         i = random.randint(0,len(tte)-1)
         ohin =np.zeros((len(final_vocab),1))
         ohtar = np.zeros((len(final_vocab),1))
@@ -33,7 +34,16 @@ if __name__ == "__main__":
         if (steps%400==0):
             print(steps)
             print(min(ll))
+
+    h = 100
     
+    plt.figure(figsize=(10, 5))
+    plt.plot(ll)
+    plt.title("Training Loss Over Steps")
+    plt.xlabel("Step")
+    plt.ylabel("Loss")
+    #plt.grid(True)
+    plt.show()
     """
     starting_c = torch.zeros((1,1),dtype=torch.long)
     generated_c = m.generate(idx=starting_c,max_new_tokens=100)

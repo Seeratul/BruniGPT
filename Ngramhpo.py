@@ -57,14 +57,14 @@ if __name__ == "__main__":
        results=pickle.load(fp)
     fp.close()
    
-   
+    out = ""
+    for i in range(square):
+       out = out +" "+str(results[0][square][i])
+    print(str("k \ n")+out)
     for i in range(square):
         out = str(results[0][i][0])
         for j in range(1,square+1):
             out = out+ " "+str("%.2f" % results[0][i][j][0])
         print(out)
-    out = ""
-    for i in range(square):
-       out = out +" "+str(results[0][square][i])
-    print("x "+out)
+    
            

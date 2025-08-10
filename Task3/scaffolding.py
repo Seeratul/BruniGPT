@@ -4,11 +4,10 @@ import torch.nn.functional as f
 import random
 
 class FSBigramLM():
-    def __init__(self, vocab_size, lr = 1e-3):
+    def __init__(self, vocab_size, lr = 1e-2):
         #lh target of w rh source of w
         self.token_embedding_table = np.random.randn(vocab_size, vocab_size)
         self.lr = lr
-
 
     def forward(self, idx, targets=None):
         #idx and targets are both (B,T) tensor of integers
@@ -40,25 +39,50 @@ class FSBigramLM():
         return idx,logits
 
     def backwards(self,input,target,probs):
-        #derivative softmax
-        #print(probs)
-        #print(target.T)
+
         dldx= probs-target.T
-
-        #derivative activationfunction
-        #No activation function :)
-
-        #derivative inlast
         dldz = input
-
-        #mul
         deltas=dldx*dldz
         deltas = deltas.T
-        self.token_embedding_table = self.token_embedding_table - self.lr*deltas
+        self.token_embedding_table = self.token_embedding_table + self.lr*deltas
 
         return None
 
+    def forward_batch(self, idx, targets=None):
+        Ba,Bl,_ = idx.shape
+        logits = []
+        lsum = 0
+        loss = []
+        for i in range(Ba):
+            logits.append(np.matvec(self.token_embedding_table ,idx[i]))
+            logits[i] =  np.clip(logits[i],1e-8,1e8)
+            for j in range(Bl):
+                #im sure there is a better way to apply softmax
+                #Also given that after this task i will switch to torch this is fine
+                probs_us = np.exp(logits[i][j])
+                logits[i][j] = (probs_us/np.sum(probs_us))[0]
+                lsum = lsum + max(-np.log(logits[i][j]) * targets[i][j])
+        if targets is not None:
+            loss.append(lsum/(Ba*Bl))
+        else:
+            loss = None
+        return logits ,loss
 
+
+
+    def backwards_batch(self,idx,target,probs):
+        Ba,Bl,_ = idx.shape
+        deltasum = np.zeros(self.token_embedding_table.shape)
+        for i in range(Ba):
+            dldx= probs[i]-target[i]
+            dldz = idx[i]
+            deltas=np.matmul(dldx,dldz,axes=[(1,0),(0,1),(0,1)])
+            deltasum = deltasum + deltas
+        
+        self.token_embedding_table = self.token_embedding_table + self.lr*deltasum
+
+        return None
+    
 class BigramLM(torch.nn.Module):
     loss = None
     def __init__(self, vocab_size):
@@ -112,6 +136,19 @@ def get_batch(enstr,block_size= 8,batch_size = 4):
     x = torch.stack([enstr[i:i+block_size] for i in ix])
     y = torch.stack([enstr[i+1:i+block_size+1] for i in ix])
     return x, y
+
+def oneHot(tensor,vocab_size):
+    batch,block = tensor.shape
+    tout = np.zeros((batch,block,vocab_size))
+    for i in range(batch):
+        for j in range(block):
+            tout[i,j,tensor[i,j]] = 1
+    return tout
+
+
+
+
+
 
 
 if __name__ == "__main__":
