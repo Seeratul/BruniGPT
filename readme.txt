@@ -59,4 +59,33 @@ It would certainly be possible to provide nicer generation that is overfitted.
 
 
 Task 3
+***GEN IS BROKEN***
 (main3)
+Task 3 was programmed entirely without pytorch with the exception of Legacy batching code.
+(Time constraints)
+The following components were hand made:
+- A one hot encoder that turns the input into a one hot vector
+- The embedding table
+- The entire forward pass
+- The entire backward pass including weight updates using sgd with batchsize 1 blocksize 1
+- A rudimentary version of the above that uses batches of larger sizes to speed up processing
+  utilizing np´s efficent matrix multiplications.
+- Proper SGD 
+- A generate function to utilize the model
+- Saving and loading
+- Calculating perplexity
+
+I probably spent way to much time on this but i really enjoyed trying to work it all out.
+Hihlights include problems with the learning rate, efficent matrix multiplication of 3d matirces and multiple hours
+of (futilly) attempting to find out how i ended up doing ascent instead of descent. 
+My implementation currently struggles with learning larger k`s due to hardware limitations
+but performs adequately for k=1. While i would love to spend more time on this I think
+this is a respectable result given the time and i shoudl really move on to task4.
+In the demo with k=1 and a rather short runtime a perplexity of 26.13 
+on the validation set was achieved.
+Below Pictures.
+
+**Pictures**
+
+Task 4
+(main4)

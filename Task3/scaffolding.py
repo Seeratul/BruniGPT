@@ -1,11 +1,10 @@
-import torch
 import numpy as np
-import torch.nn.functional as f
 import random
 
 class FSBigramLM():
     def __init__(self, vocab_size, lr = 1e-2):
         #lh target of w rh source of w
+        self.vocab_size = vocab_size
         self.token_embedding_table = np.random.randn(vocab_size, vocab_size)
         self.lr = lr
 
@@ -16,7 +15,7 @@ class FSBigramLM():
         #softmax because it makes it all easier
         logits =  np.clip(logits,1e-8,1e8)
         probs_us = np.exp(logits)
-        logits = (probs_us/np.sum(probs_us))[0]
+        logits = (probs_us/np.sum(probs_us))
         #logits = logits.view(B*T,C)
         if targets is not None:
             loss = (-np.log(logits) * targets.T)
@@ -26,17 +25,19 @@ class FSBigramLM():
     
     def generate(self,idx, max_new_tokens):
         #idx is (B,T) array
-        for _ in range(max_new_tokens):
-            keys = np.arange(0,10)
+        self.idx = []
+        self.idx.append(idx)
+        for i in range(max_new_tokens):
+            next = np.zeros(self.vocab_size)
+            keys = np.arange(0,self.vocab_size)
             #get the predictor
-            logits,loss = self.forward(idx)
+            logits,loss = self.forward(self.idx[i])
             #sample from dist
-            print(logits.shape)
-            print(keys.shape)
             idx_next = random.choices(keys, weights=logits, k=1)
+            next[idx_next] = 1
             #append sampled index
-            self.idx = np.concatenate((idx,idx_next),dim=1)
-        return idx,logits
+            self.idx.append(next)
+        return self.idx,logits
 
     def backwards(self,input,target,probs):
 
@@ -81,8 +82,38 @@ class FSBigramLM():
         
         self.token_embedding_table = self.token_embedding_table + self.lr*deltasum
 
+
         return None
     
+class stoitos:
+    def __init__(self,text):
+        self.stoi = {ch:i for i,ch in enumerate(text)}
+        self.itos = {i:ch for i,ch in enumerate(text)}
+
+    def encode(self,s):
+        return [self.stoi[c] for c in s]
+    def decode(self,l):
+        return [self.itos[i] for i in l]
+
+def get_batch(enstr,block_size= 8,batch_size = 4):
+    ix = torch.randint(len(enstr) - block_size, (batch_size,))
+    x = torch.stack([enstr[i:i+block_size] for i in ix])
+    y = torch.stack([enstr[i+1:i+block_size+1] for i in ix])
+    return x, y
+
+def oneHot(tensor,vocab_size):
+    batch,block = tensor.shape
+    tout = np.zeros((batch,block,vocab_size))
+    for i in range(batch):
+        for j in range(block):
+            tout[i,j,tensor[i,j]] = 1
+    return tout
+
+
+
+
+import torch.nn.functional as f
+import torch
 class BigramLM(torch.nn.Module):
     loss = None
     def __init__(self, vocab_size):
@@ -120,32 +151,6 @@ class BigramLM(torch.nn.Module):
 
     def backwards():
         return None
-
-class stoitos:
-    def __init__(self,text):
-        self.stoi = {ch:i for i,ch in enumerate(text)}
-        self.itos = {i:ch for i,ch in enumerate(text)}
-
-    def encode(self,s):
-        return [self.stoi[c] for c in s]
-    def decode(self,l):
-        return [self.itos[i] for i in l]
-
-def get_batch(enstr,block_size= 8,batch_size = 4):
-    ix = torch.randint(len(enstr) - block_size, (batch_size,))
-    x = torch.stack([enstr[i:i+block_size] for i in ix])
-    y = torch.stack([enstr[i+1:i+block_size+1] for i in ix])
-    return x, y
-
-def oneHot(tensor,vocab_size):
-    batch,block = tensor.shape
-    tout = np.zeros((batch,block,vocab_size))
-    for i in range(batch):
-        for j in range(block):
-            tout[i,j,tensor[i,j]] = 1
-    return tout
-
-
 
 
 
