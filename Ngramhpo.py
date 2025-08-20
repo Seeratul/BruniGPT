@@ -4,6 +4,8 @@ import Task1.bpe as bpe
 import Task2.Ngram as ngram
 import Task2.utils as utils
 import numpy as np
+import main4 as m4
+
 
 
 def hpo(text,vtext,square = 10,merge_min=0,merge_max=5000,nmin=0,nmax=10,extra=True):

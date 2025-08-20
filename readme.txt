@@ -79,8 +79,8 @@ I probably spent way to much time on this but i really enjoyed trying to work it
 Hihlights include problems with the learning rate, efficent matrix multiplication of 3d matirces and multiple hours
 of (futilly) attempting to find out how i ended up doing ascent instead of descent. 
 My implementation currently struggles with learning larger k`s due to hardware limitations
-but performs adequately for k=1. While i would love to spend more time on this I think
-this is a respectable result given the time and i shoudl really move on to task4.
+but performs adequately for k=1. While I would love to spend more time on this I think
+this is a respectable result given the time and i should really move on to task4.
 In the demo with k=1 and a rather short runtime a perplexity of 26.13 
 on the validation set was achieved.
 Below Pictures.
@@ -89,3 +89,13 @@ Below Pictures.
 
 Task 4
 (main4)
+Implementation:
+Its a standard GPT implementation along the lines of the provided examples.
+It contains:
+- A self build transformer block using GELU
+- An optimized data loader for batching
+- The Gelu activation function
+- A one call hook to run it for HPO with certain parameters
+- A visualization tool
+- A tool for ther generated output
+
