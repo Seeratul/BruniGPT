@@ -1,12 +1,11 @@
 ## GPT from Scratch
 ### Introduction 
-This repository was build as part of my masters program in cognitive science for the 
-intensive course "Building GPT from scratch".
-It is divided into 4 parts:
-Task 1: In which basic data handling and Byte Pair encoding is covered  
-Task 2: In which I use those encodings with N-Grams to create a basic text completion feature  
-Task 3: In which I built a Neural encoding and back propagation from scratch 
-Task 4: In which I implement a General Purpose Transformer and then apply it to the dataset
+This repository was build as part of my masters program in cognitive science for the intensive course "Building GPT from scratch".     
+It is divided into 4 parts:   
+Task 1: In which basic data handling and Byte Pair encoding is covered     
+Task 2: In which I use those encodings with N-Grams to create a basic text completion feature    
+Task 3: In which I built a Neural encoding and back propagation from scratch   
+Task 4: In which I implement a General Purpose Transformer and then apply it to the dataset  
 
 
 ### Task 1
@@ -52,6 +51,7 @@ Hardware limited on my computer to n<=10grams.
 Applies Laplace smoothing on generation.
 - [Ngramhpo.py](Ngramhpo.py)
 Uses Ngram engine to calculate a matrix of perplexity relative to k/n for an engine generated with train.
+
 ![](/images/ngramtable.png)
 
 - Extrinsic evaluation/sentencegen. 
@@ -111,6 +111,7 @@ And lastly neural embedding size as it is costly but also necessary for performa
 I decided to first explore Learning rate and the number of layers/depth.    
 
 I got the following result:
+
 ![](/images/lr_d.png)
 
 All of the runs ran untill early termination was reached.   
@@ -131,9 +132,11 @@ Below the graph.
 Training loss in Blue.   
 Test loss in Orange.  
 And Perplexity in green on a wrong scale.
+
 ![](/images/Finalk2000.png)
 
 Below the correct graph for Perplexity(Green)
+
 ![](/images/Finalk2000Perp.png)
 
 It ran for 3200 iteration before being cut short as test loss stopped improving.  
@@ -147,9 +150,11 @@ Well atleast the stopping generation on stop tokens works.
 Now utilizing the same parameters but k=1
 Training loss in Blue.   
 Test loss in Orange.  
+
 ![](/images/tlk1final.png)
 
 Perplexity in Blue Below
+
 ![](/images/Perpk1Final.png)
 
 It ran for 13200 iteration before being cut short as test loss stopped improving.  
