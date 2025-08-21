@@ -1,4 +1,14 @@
 ## GPT from Scratch
+### Introduction 
+This repository was build as part of my masters program in cognitive science for the 
+intensive course "Building GPT from scratch".
+It is divided into 4 parts:
+Task 1: In which basic data handling and Byte Pair encoding is covered  
+Task 2: In which I use those encodings with N-Grams to create a basic text completion feature  
+Task 3: In which I built a Neural encoding and back propagation from scratch 
+Task 4: In which I implement a General Purpose Transformer and then apply it to the dataset
+
+
 ### Task 1
 
 For code checkout [main1.py](main1.py)
@@ -24,20 +34,20 @@ I made the decision that massively increasing k for minimal returns (above 4000)
 ### Bonus: 
 As BPE progressively merges subwords some subwords might end up "orphaned"/rarely used as a large chunk of their occurrence might get swallowed by a bigger subword.  
 Given that we want as much information as possible packed into as few and as general subwords as possible this is not ideal.  
-The solution to this was to run a second optimization/bonus round in which subwords that have less occurrence then the most common pair
+The solution to this was to run a second optimization/bonus round in which subwords that have less occurrence than the most common pair
 get unmerged and that most common pair gets turned into a subword instead.  
 The performance impact of this method will be discussed in Task 2.  
 In task one with k 2000 it improves compression on the training set by 0.002 with the test set being unaffected.  
-This could be due to the small size of the dataset or because this postrocessing is frankly a waste of time.  
-Given extremely small ks like 50 there is an improvement for the test data of 0.006 which is an improvement of compression by 5%.  
-Bonus Bonus: For data symmetry reasons I don't understand, the optimization/bonus round always leads to an optimal set after k-1 passes.  
+This could be due to the small size of the dataset or because this post-processing is frankly a waste of time.  
+Given minimal ks like 50 there is an improvement for the test data of 0.006 which is an improvement of compression by 5%.  
+Bonus: For data symmetry reasons I don't understand, the optimization/bonus round always leads to an optimal set after k-1 passes.  
 I think this is really neat and probably something already known, somewhere.
 
 ### Task 2
 For code checkout [main2.py](main2.py)
 - N gram engine.
 Arbitrarily scalable engine that uses the highest 3 grams that have a match for the key with a 0.6,0.3,0.1 weighting respectively. 
-Automatically cuts text to size of highest gram and can default to using only 2 (0.7,0.3) grams or the unigram model.   
+Automatically cuts text to size of the highest n-gram and can default to using only 2 (0.7,0.3) grams or the unigram model.   
 Hardware limited on my computer to n<=10grams.
 Applies Laplace smoothing on generation.
 - [Ngramhpo.py](Ngramhpo.py)
