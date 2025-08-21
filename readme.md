@@ -162,3 +162,7 @@ Test loss ended up at 1.67
 With test Perplexity being 5.34    
 For the test text 'Lord: Rise! My people, conquer the north!' it produced      
 'i never is thee probo, peace!'     
+
+And with those words from my best GPT implementation yet I would like to finish this report.
+In the end the lower complexity task of k=1 was easier to solve than having higher more discriptive k actually make sense.
+I would be really curious if/how any student achiveved better or similar performance with higher k´s.
