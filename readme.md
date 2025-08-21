@@ -132,6 +132,7 @@ Training loss in Blue.
 Test loss in Orange.  
 And Perplexity in green on a wrong scale.
 ![](/images/Finalk2000.png)
+
 Below the correct graph for Perplexity(Green)
 ![](/images/Finalk2000Perp.png)
 
@@ -147,6 +148,7 @@ Now utilizing the same parameters but k=1
 Training loss in Blue.   
 Test loss in Orange.  
 ![](/images/tlk1final.png)
+
 Perplexity in Blue Below
 ![](/images/Perpk1Final.png)
 
