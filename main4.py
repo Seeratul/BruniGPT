@@ -513,7 +513,7 @@ def Hpohook(lr=0.001,n_embd=64,depth= 8):
 
 if __name__ == "__main__":
     #Vars
-    k = 2000
+    k = 0
     patience = 4
     pclock= 0
     lr = 5e-4
@@ -604,8 +604,15 @@ if __name__ == "__main__":
 
     plt.plot(x, y1, label ='trainloss')
     plt.plot(x, y2, label ='punctual testloss')
+    plt.legend()
+    plt.title("Over Steps")
+    plt.xlabel(str(h)+"steps")
+    plt.ylabel("Loss")
+    plt.show()
+
     plt.plot(x, y3, label ='punctual perplexiy')
-    plt.title("Training Loss Over Steps")
+    plt.legend()
+    plt.title(" Over Steps")
     plt.xlabel(str(h)+"steps")
     plt.ylabel("Loss")
     plt.show()
