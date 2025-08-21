@@ -8,7 +8,7 @@ import main4 as m4
 
 
 
-def hpo(square = 5,lrmin=0,lrmax=4500,depthmin=0,depthmax=1):
+def hpo(square = 5,lrmin=0.0001,lrmax=0.001,n_embdmin=8,n_embdmax=72):
     
     results = [[] for x in range(square+1)]
     runlenght = [[] for x in range(square+1)]
@@ -25,17 +25,17 @@ def hpo(square = 5,lrmin=0,lrmax=4500,depthmin=0,depthmax=1):
         runlenght[i-1].append(lr_i)
         for j in range(1,square+1):
             print("Inner Run "+str(j)+ " of outer Run " +str(i)+ " started")
-            depth_j=int(depthmin+(j-1)*(depthmax-depthmin)/(square-1))
-            loss,rl = m4.Hpohook(lr_i,depth_j)
+            n_embd_j=int(n_embdmin+(j-1)*(n_embdmax-n_embdmin)/(square-1))
+            loss,rl = m4.Hpohook(lr = lr_i,n_embd=n_embd_j)
             results[i-1].append(loss)
             runlenght[i-1].append(rl)
 
             if i == square:
-                results[i].append(depth_j)
-                runlenght[i].append(depth_j)
+                results[i].append(n_embd_j)
+                runlenght[i].append(n_embd_j)
     
     
-    with open("gpttester.pkl", "wb") as fp:
+    with open("gpttester2.pkl", "wb") as fp:
         pickle.dump([results,runlenght],fp)
     fp.close()
 
@@ -46,17 +46,17 @@ def hpo(square = 5,lrmin=0,lrmax=4500,depthmin=0,depthmax=1):
 if __name__ == "__main__":
     square = 5
     
-    #[results,runlenght] = [hpo(square=square,lrmin=1e-5,lrmax=1e-2,depthmin=2,depthmax=12)]
-    with open("gpttester.pkl", "rb") as fp:
+    #results,runlenght = hpo(square=square,lrmin=1e-4,lrmax=1e-3,n_embdmin=8,n_embdmax=72)
+    with open("gpttester2.pkl", "rb") as fp:
        [results,runlenght]=pickle.load(fp)
     fp.close()
-    results = [results]
-    #runlenght = [runlenght]
-   
+    #results = [results]
+    runlenght = [runlenght]
+    results = runlenght
     out = ""
     for i in range(square):
        out = out +" "+str(results[0][square][i])
-    print(str("lr d")+out)
+    print(str("lr ne")+out)
     for i in range(square):
         out = str("%.5f" % results[0][i][0])
         for j in range(1,square+1):

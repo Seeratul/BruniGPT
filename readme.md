@@ -1,10 +1,11 @@
-Task 1 
-(for code checkout main1.py)
-All the measures for task 1 were eyballed as proper hpo was supposed to wait for Task 2+.
+# GPT from Scratch
+(for code checkout [main1.py](main1.py))
+All the measures for task 1 were eyeballed as proper hpo was supposed to wait for Task 2+.
 
 To get a good first look at the data I ran:
 "tr 'A-Z' 'a-z' < shakes.txt | tr -sc 'A-Za-z' '\n' | sort | uniq -c | sort -nr | head"
 in the console.
+
 After which i performed the following steps:
 - Perform Train and test split.
 I used the provided file clean_nltk_shakespear_data.py to create a train test and eval set.
@@ -30,7 +31,7 @@ Bonus Bonus: For data symetry reasons i dont understand the optimization/bonus r
 set after k-1 passes. I think this is really neet and probably something already known, somwhere.
 
 Task 2
-(for code checkout main2.py)
+(for code checkout [main2.py](main2.py))
 - N gram engine.
 Arbitrarily scalable engine that uses the highest 3 grams that have a match for the key with a 0.6,0.3,0.1 weighting respectively. 
 Automaticly cuts text to size of highest gram and can default to using only 2 (0.7,0.3)grams or the unigram model. 
@@ -59,8 +60,8 @@ It would certainly be possible to provide nicer generation that is overfitted.
 
 
 Task 3
-***GEN IS BROKEN***
-(main3)
+
+[main3.py](main3.py)
 Task 3 was programmed entirely without pytorch with the exception of Legacy batching code.
 (Time constraints)
 The following components were hand made:
@@ -84,11 +85,10 @@ this is a respectable result given the time and i should really move on to task4
 In the demo with k=1 and a rather short runtime a perplexity of 26.13 
 on the validation set was achieved.
 Below Pictures.
-
-**Pictures**
+![](/images/TLNeuralgramK1.png)
 
 Task 4
-(main4)
+[main4.py](main4.py)
 Implementation:
 Its a standard GPT implementation along the lines of the provided examples.
 It contains:
@@ -103,6 +103,10 @@ It contains:
 For HPO I used my usual scaffolding with some slight tweaks available in GPTHPO.py
 As recommened I will limit my exploration of K to K= 2000 and one K=1 run once best parameters for 
 k=2000 have been found.
+The Parameters I chose to optimize were 
+Learning rate, as it limits how "fine" the result can be but also slows down the progress.
+Depth as it is an efficent way to increase complexity.
+And lastly neural embedding size as it is costly but also necessary for performance.
 I decided to first explore Learning rate and the number of layers/depth.
 I got the following result:
 lr/d 2 4 7 9 12
@@ -116,11 +120,32 @@ My scaling between min and max didnt really work as intendet.
 Regardless we got a pretty solid result that d ~ 8 seems to lead to the best results,
 with smaller ds not far behind.
 And lr should be 0.0025>0.00001.
-I will now run it again with d = 8 testing for lr and embedding size.
-Graph
+I will now run it again with d = 8 testing to find good parameters for lr and nembedding size.
+lr/ne   8    24   40   56   72
+0.00010 4.54 4.24 3.98 3.92 3.95
+0.00032 4.29 3.84 3.77 3.54 3.44
+0.00055 4.21 3.91 3.77 3.58 3.30
+0.00078 4.23 3.92 3.70 3.70 3.35
+0.00100 4.24 3.72 3.63 3.50 3.38
+All of the runs ran untill early termination was reached.
+Intrestingly the best run ne=72 lr=0.0005 took the longest.
+(As opposed to for example the runs with the lowerst lr which I had naively assumed would take longest)
+So those will be my final parameters.
+Lr = 5e-4
+ne = 72
+d = 8
 It ran for 3200 iteration before being cut short as test loss stopped improving.
 Test loss ended up at 3.94
+With test Perplexity being 34.71614084701712
+Below the graph.
+Training loss in Blue 
+Test loss in Orange
+And Perplexity in green on a wrong scale.
+![](/images/Finalk2000.png)
+Below the correct graph for Perplexity(Green)
+![](/images/Finalk2000Perp.png)
 
 For the test text 'Lord: Rise! My people, conquer the north!' it produced 
 'urding, bufancie.' as output.
+
 

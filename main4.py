@@ -18,6 +18,7 @@ import tiktoken
 from Task2 import utils
 import matplotlib.pyplot as plt
 from pathlib import Path
+from torcheval.metrics.text import Perplexity
 
 
 
@@ -299,6 +300,7 @@ class Trainer:
         self.abort = False
         self.tl = []
         self.ll = []
+        self.pp = []
         self.tester = tester
 
         # variables that will be assigned to trainer class later for logging and etc
@@ -406,7 +408,11 @@ class Tester:
 
         # forward the model
         logits, self.loss = model(x, y)
-        return self.loss
+        #calc perplexity
+        metric=Perplexity()
+        metric.update(logits, y)
+        perplexity = metric.compute().item()
+        return self.loss,perplexity
 
 class ShakespeareDataset(Dataset):
     def __init__(self, data, block_size=128, device_type='cpu'):
@@ -432,8 +438,11 @@ def batch_end_callback(trainer):
     trainer.ll.append(trainer.loss.item())
     if trainer.iter_num % 400 == 0:
         print(f"iter_dt {trainer.iter_dt * 1000:.2f}ms; iter {trainer.iter_num}: avg train loss {sum(trainer.ll[trainer.iter_num-400:trainer.iter_num])/400:.5f}")
-        trainer.tl.append(trainer.tester.run().item())
+        tel,perp = trainer.tester.run()
+        trainer.tl.append(tel.item())
+        trainer.pp.append(perp)
         print("test loss "+ str(trainer.tl[-1]))
+        print("test perplexity "+ str(trainer.pp[-1]))
         if(trainer.tl[-1] < trainer.minloss):
             trainer.pclock = 0
             trainer.minloss = trainer.tl[-1]
@@ -444,7 +453,7 @@ def batch_end_callback(trainer):
                 print("Early Stop")
                 trainer.config.max_iters = trainer.iter_num
 
-def Hpohook(lr,depth):
+def Hpohook(lr=0.001,n_embd=64,depth= 8):
      #Vars
     k = 2000
     patience = 4
@@ -473,8 +482,8 @@ def Hpohook(lr,depth):
     #train_data = train_dataset
     #val_data = test_dataset
     #vocab_size = len(train_dataset)
-    config = CustomConfig(vocab_size=len(final_vocab),learning_rate=lr,n_layer=depth)
-    tconfig = CustomConfig(vocab_size=len(final_vocab),batch_size=32,block_size=64,learning_rate=0)
+    config = CustomConfig(vocab_size=len(final_vocab),learning_rate=lr,n_layer=depth,n_embd=n_embd)
+    tconfig = CustomConfig(vocab_size=len(final_vocab),batch_size=32,block_size=64,learning_rate=0,n_embd=n_embd)
 
 
     #Create datasets and loader torch objects for train and ...
@@ -505,9 +514,11 @@ def Hpohook(lr,depth):
 if __name__ == "__main__":
     #Vars
     k = 2000
-    patience = 2
-    pclock=0
-    lr = 0
+    patience = 4
+    pclock= 0
+    lr = 5e-4
+    n_embd = 72
+    depth = 8
     #DataPrep
     f = open("sc_train.txt")
     text = f.read()
@@ -533,8 +544,8 @@ if __name__ == "__main__":
     train_data = train_dataset
     val_data = test_dataset
     #vocab_size = len(train_dataset)
-    config = CustomConfig(vocab_size=len(final_vocab))
-    tconfig = CustomConfig(vocab_size=len(final_vocab),batch_size=32,block_size=64,learning_rate=lr)
+    config = CustomConfig(vocab_size=len(final_vocab),learning_rate=lr,n_layer=depth,n_embd=n_embd)
+    tconfig = CustomConfig(vocab_size=len(final_vocab),batch_size=32,block_size=64,learning_rate=0)
 
 
     #Create datasets and loader torch objects for train and ...
@@ -576,7 +587,7 @@ if __name__ == "__main__":
     lln = []
     h = 400
     for i in range(int(config.max_iters/h)):
-        lln.append(sum(ll[i*h:(i+1)*h])/h)
+        lln.append(sum(trainer.ll[i*h:(i+1)*h])/h)
 
     #Save to disk
     #p = f"Task3/saves/{config.learning_rate}_{k}_{config.max_iters}_{min(lln)}"
@@ -588,10 +599,12 @@ if __name__ == "__main__":
 
     x = range(int(config.max_iters/h))
     y1 = lln
-    y2 = tl[:-1]
+    y2 = trainer.tl[:-1]
+    y3 = trainer.pp[:-1]
 
     plt.plot(x, y1, label ='trainloss')
     plt.plot(x, y2, label ='punctual testloss')
+    plt.plot(x, y3, label ='punctual perplexiy')
     plt.title("Training Loss Over Steps")
     plt.xlabel(str(h)+"steps")
     plt.ylabel("Loss")
