@@ -157,8 +157,8 @@ Perplexity in Blue Below
 
 ![](/images/Perpk1Final.png)
 
-It ran for 13200 iteration before being cut short as test loss stopped improving.  
-Test loss ended up at 1.67
-With test Perplexity being 5.34
-For the test text 'Lord: Rise! My people, conquer the north!' it produced 
-'i never is thee probo, peace!'
+It ran for 13200 iteration before being cut short as test loss stopped improving.     
+Test loss ended up at 1.67   
+With test Perplexity being 5.34    
+For the test text 'Lord: Rise! My people, conquer the north!' it produced      
+'i never is thee probo, peace!'     
